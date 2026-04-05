@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>SAGE Dashboard</title>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Segoe UI", sans-serif;
+}
+
+body {
+    background: linear-gradient(135deg, #1d1d1f, rgb(8, 11, 17));
+    color: white;
+}
+
+/* Header */
+header {
+    padding: 20px 30px;
+    font-size: 22px;
+    font-weight: 600;
+}
+
+/* Container */
+.container {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    padding: 20px 30px;
+}
+
+/* Cards */
+.card {
+    background: rgba(128, 124, 124, 0.05);
+    backdrop-filter: blur(12px);
+    border-radius: 15px;
+    padding: 20px;
+    transition: 0.3s;
+    box-shadow: 0 0 20px rgba(0,0,0,0.3);
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+.card h2 {
+    font-size: 28px;
+    margin-bottom: 5px;
+}
+
+.card p {
+    font-size: 14px;
+    color: #94a3b8;
+}
+
+/* Colors */
+.low { border-left: 4px solid #f6f6f6; }
+.medium { border-left: 4px solid #ffffff; }
+.high { border-left: 4px solid #ffffff; }
+.blocked { border-left: 4px solid #ffffff; }
+
+/* Logs */
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+th, td {
+    padding: 10px;
+    text-align: left;
+}
+
+th {
+    color: #94a3b8;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+tr {
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.logs {
+    margin: 20px 30px;
+    padding: 20px;
+    border-radius: 15px;
+    background: rgba(0,0,0,0.5);
+    height: 350px;
+    overflow-y: auto;
+    font-family: monospace;
+    box-shadow: 0 0 20px rgba(0,0,0,0.3);
+}
+
+.log {
+    margin-bottom: 6px;
+    font-size: 13px;
+}
+
+/* Scrollbar */
+.logs::-webkit-scrollbar {
+    width: 6px;
+}
+.logs::-webkit-scrollbar-thumb {
+    background: #475569;
+    border-radius: 10px;
+}
+</style>
+</head>
+
+<body>
+
+<header>SAGE Security Dashboard</header>
+
+<div class="container">
+    <div class="card low">
+        <h2 id="total">0</h2>
+        <p>Total Requests</p>
+    </div>
+
+    <div class="card medium">
+        <h2 id="medium">0</h2>
+        <p>Medium Risk</p>
+    </div>
+
+    <div class="card high">
+        <h2 id="high">0</h2>
+        <p>High Risk</p>
+    </div>
+
+    <div class="card blocked">
+        <h2 id="blocked">0</h2>
+        <p>Blocked</p>
+    </div>
+</div>
+
+<div class="logs">
+    <table id="logTable">
+        <thead>
+            <tr>
+                <th>IP</th>
+                <th>Requests</th>
+                <th>Endpoint Hits</th>
+                <th>Risk</th>
+                <th>Penalty</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
+
+<script>
+    async function fetchData() {
+        const res = await fetch("/dashboard");
+        const data = await res.json();
+    
+        let ipData = {};
+    
+        let medium = 0;
+        let high = 0;
+        let blocked = 0;
+    
+        // 🔥 GROUP DATA BY IP
+        data.forEach(item => {
+            const value = parseInt(item.value);
+            const parts = item.key.split(":");
+            const type = parts[0];
+            const ip = parts[1];
+    
+            if (!ipData[ip]) {
+                ipData[ip] = {
+                    req: 0,
+                    endpoint: 0,
+                    risk: 0,
+                    penalty: 0
+                };
+            }
+    
+            if (type === "req") ipData[ip].req = value;
+            if (type === "endpoint") ipData[ip].endpoint = value;
+            if (type === "risk") ipData[ip].risk = value;
+            if (type === "penalty") ipData[ip].penalty = value;
+        });
+    
+        // 🔥 BUILD TABLE
+        const tbody = document.querySelector("#logTable tbody");
+        tbody.innerHTML = "";
+    
+        Object.keys(ipData).forEach(ip => {
+            const user = ipData[ip];
+    
+            let status = "LOW";
+            if (user.risk >= 30) {
+                status = "MEDIUM ⚠️";
+                medium++;
+            }
+            if (user.risk >= 50 || user.penalty > 0) {
+                status = "HIGH 🚨";
+                high++;
+            }
+            if (user.penalty > 0) {
+                blocked++;
+            }
+    
+            tbody.innerHTML += `
+                <tr>
+                    <td>${ip}</td>
+                    <td>${user.req}</td>
+                    <td>${user.endpoint}</td>
+                    <td>${user.risk}</td>
+                    <td>${user.penalty}</td>
+                    <td style="color: ${status.includes('HIGH') ? 'red' : status.includes('MEDIUM') ? 'orange' : 'green'}">
+                        ${status}
+                    </td>
+                </tr>
+            `;
+        });
+    
+        // 🔥 UPDATE CARDS
+        let total = Object.values(ipData).reduce((sum, user) => sum + user.req, 0);
+    
+        document.getElementById("total").innerText = total;
+        document.getElementById("medium").innerText = medium;
+        document.getElementById("high").innerText = high;
+        document.getElementById("blocked").innerText = blocked;
+    }
+    
+    setInterval(fetchData, 2000);
+    </script>
+
+</body>
+</html>
