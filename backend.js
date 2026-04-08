@@ -5,6 +5,7 @@ app.get("/data", (req, res) => {
     res.json({ message: "Response from Backend Server" });
 });
 
-app.listen(4000, () => {
-    console.log("Backend running on port 4000");
+const PORT = process.env.BACKEND_PORT || 4000;
+app.listen(PORT, () => {
+    console.log(`Backend running on port ${PORT}`);
 });

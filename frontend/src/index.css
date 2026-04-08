@@ -32,12 +32,33 @@
     @apply border-border;
   }
   body {
-    @apply bg-[#03050C] text-foreground antialiased overflow-x-hidden min-h-screen relative;
-    /* Ultra Modern Gradient Mesh Background */
-    background-image: 
-        radial-gradient(circle at 15% 50%, rgba(59, 130, 246, 0.15), transparent 35%),
-        radial-gradient(circle at 85% 30%, rgba(139, 92, 246, 0.15), transparent 35%),
-        radial-gradient(circle at 50% 10%, rgba(56, 189, 248, 0.1), transparent 40%),
-        radial-gradient(circle at 50% 90%, rgba(239, 68, 68, 0.05), transparent 40%);
+    @apply bg-black text-foreground antialiased overflow-x-hidden min-h-screen relative;
+  }
+}
+
+@layer utilities {
+  .animate-blob {
+    animation: blob 8s infinite alternate cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .animation-delay-2000 {
+    animation-delay: 2s;
+  }
+  .animation-delay-4000 {
+    animation-delay: 4s;
+  }
+}
+
+@keyframes blob {
+  0% {
+    transform: translate(0px, 0px) scale(1) rotate(0deg);
+  }
+  33% {
+    transform: translate(120px, -100px) scale(1.1) rotate(45deg);
+  }
+  66% {
+    transform: translate(-50px, 80px) scale(0.9) rotate(-15deg);
+  }
+  100% {
+    transform: translate(0px, 0px) scale(1) rotate(0deg);
   }
 }

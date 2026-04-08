@@ -12,8 +12,10 @@ const mockRedis = {
 const redisConfig = process.env.REDIS_URL || { host: "127.0.0.1", port: 6379 };
 
 const ioredisOptions = {
-    maxRetriesPerRequest: 1,
-    retryStrategy() { return null; } // don't retry, let it fail fast
+    retryStrategy(times) {
+        const delay = Math.min(times * 50, 2000);
+        return delay;
+    }
 };
 
 const redisClient = typeof redisConfig === "string"

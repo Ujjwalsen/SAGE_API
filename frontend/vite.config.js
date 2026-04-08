@@ -14,6 +14,10 @@ export default defineConfig({
       '/dashboard': {
         target: 'http://localhost:3000',
         changeOrigin: true,
+      },
+      '/events': {
+        target: 'http://localhost:3000',
+        changeOrigin: true,
       }
     }
   }

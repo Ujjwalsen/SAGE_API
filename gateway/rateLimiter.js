@@ -1,18 +1,25 @@
-const { RateLimiterMemory } = require("rate-limiter-flexible");
+const { RateLimiterRedis } = require("rate-limiter-flexible");
+const redisClient = require("../config/redis");
 
 // 🌍 Global limiter (important)
-const globalLimiter = new RateLimiterMemory({
+const globalLimiter = new RateLimiterRedis({
+    storeClient: redisClient,
+    keyPrefix: 'ratelimit:global',
     points: 100,
     duration: 10,
 });
 
 // ✅ Create once (persistent)
-const normalLimiter = new RateLimiterMemory({
+const normalLimiter = new RateLimiterRedis({
+    storeClient: redisClient,
+    keyPrefix: 'ratelimit:normal',
     points: 20,
     duration: 60,
 });
 
-const strictLimiter = new RateLimiterMemory({
+const strictLimiter = new RateLimiterRedis({
+    storeClient: redisClient,
+    keyPrefix: 'ratelimit:strict',
     points: 5,
     duration: 60,
 });
