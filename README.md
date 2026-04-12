@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="docs/assets/logo1.png" alt="SAGE API Logo" width="180"/>
+<img src="docs/assets/logo.png" alt="SAGE API Logo" width="180"/>
 
 # SAGE API Gateway
 **S**ecurity • **A**nalytics • **G**ateway • **E**ngine
